@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.demo.dao.ChartConfigRepository">
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.demo.model.ChartConfigDo">
+        <id column="id" property="id" />
+        <result column="inner_key" property="innerKey" />
+        <result column="lang_type" property="langType" />
+        <result column="title" property="title" />
+        <result column="tag" property="tag" />
+        <result column="meaning" property="meaning" />
+        <result column="char_key" property="charKey" />
+        <result column="char_value" property="charValue" />
+        <result column="indicator_ids" property="indicatorIds" />
+        <result column="chart_type" property="chartType" />
+        <result column="link_banner" property="linkBanner" />
+        <result column="view_type" property="viewType" />
+        <result column="switch_charts" property="switchCharts" />
+        <result column="chart_periods" property="chartPeriods" />
+        <result column="intro" property="intro" />
+        <result column="data" property="data" />
+        <result column="data_formula" property="dataFormula" />
+        <result column="is_use_search" property="isUseSearch" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, inner_key, lang_type, title, tag, meaning,char_key,char_value,indicator_ids,chart_type,
+          link_banner,view_type,switch_charts,chart_periods,intro,data,data_formula,is_use_search,create_time,update_time
+    </sql>
+
+</mapper>

@@ -1,0 +1,908 @@
+syntax = "proto3";
+
+import "trade_common_type_def.proto"; 
+import "trade_type_def.proto";
+
+package com.smart.market.model.gateway;
+option java_multiple_files = true;
+
+enum ProtoVersion
+{
+    VERSION_0 = 0;
+    VERSION_1 = 1;                              //  当前使用的业务协议版本号，
+}
+
+message TradeMsgCarrier
+{
+    uint64           series_id = 1;             // 序号(中台使用)
+    TradeMsgType     type      = 2;             // 交易消息类型
+    ProtoVersion     version   = 3;             // 协议版本号
+    TradeRetCode     ret       = 4;             // 错误信息
+    bytes            data      = 5;             // 交易协议数据
+    string           platform  = 6;             // 平台 IOS Android PC 
+    string           device_id = 7;             // 设备ID 
+}
+
+message AccountInfo
+{
+    string         account = 1;                
+}
+
+// 交易返回码
+message TradeRetCode
+{
+    TreadeRetCode code = 1;                     // 错误码
+    string        msg  = 2;                     // 错误消息
+}
+
+//-------------交易账户心跳请求------------------------------------------------------
+message AccountHeartBeatReq
+{
+    uint64 session_id        = 1;               // 会话ID
+    string account           = 2;               // 资金账号
+}
+
+message AccountHearBeatRsp
+{
+    TradeRetCode ret                 = 1;       // 业务处理返回信息
+    string       account             = 3;       // 资金账号
+}
+//-----------------------------------------------------------------------------------------
+
+
+//------交易账户登录-------------------------------------------------------------------------
+message UsrLoginReq
+{
+    string account          = 1;                // 交易账户ID 
+    string pwd              = 2;                // 密码
+    string new_pwd          = 3;                // 新密码
+    string ip_address       = 4;                // IP 地址
+    bool   change_pwd       = 5;                // 是否修改密码
+}
+
+// 登录应答
+message UsrLoginRsp
+{
+    TradeRetCode ret                 = 1;       // 业务处理返回信息
+    uint64       session_id          = 2;       // 会话ID
+    string       account             = 3;       // 账号 
+    string       last_login_ip       = 4;       // 上次登录IP 
+    string       last_login_time     = 5;       // 上次登录时间UTC时间戳
+    string       last_logout_time    = 6;       // 上次退出时间UTC时间戳
+    bool         is_need_mod_pwd     = 7;       // 是否需要修改密码
+    string       trade_date          = 8;       // 当前交易日
+    string       last_settle_time    = 9;       // 上次结算日期
+    repeated string              contact = 10;  
+}
+//-----------------------------------------------------------------------------------------
+
+message APIReadyRtn
+{
+    TradeRetCode ret                 = 1;       // 业务处理返回信息
+    string account					  = 2;  // 账户
+}
+
+// --------------------------登出----------------------------
+message UsrLogoutReq
+{
+    uint64 session_id       = 1;                // 会话ID
+    string account          = 2;                // 账号 
+    string site             = 3;                // 站点
+}
+
+message UsrLogoutRsp
+{
+    TradeRetCode ret            = 1;            // 业务处理返回信息
+    string account              = 2;            // 账号
+}
+
+//----------------------------------------------------------------------
+
+//------------------修改密码---------------------------------
+message ModPassWordReq
+{
+    uint64 session_id        = 1;               // 会话ID
+    string account           = 2;               // 账户
+    string old_pwd           = 3;               // 原密码
+    string new_pwd           = 4;               // 新密码
+}
+
+message ModPassWordRsp
+{
+    TradeRetCode ret                 = 1;       // 业务处理返回信息
+    string       account             = 2;       // 账户 
+}
+
+//--------------------查询类------------------
+message QueryLoginStatusReq
+{
+    uint64 session_id  = 1;                     // 会话ID
+    string account     = 2;                     // 账户
+}
+
+message QueryLoginStatusRsp
+{
+    TradeRetCode ret                 = 1;       // 业务处理返回信息
+    string       account             = 2;       // 账户
+    bool         is_disconnect       = 3;       // 账户是否已经与柜台断线
+}
+
+// 资金查询请求
+message QueryFutureBalanceReq
+{
+    uint64 session_id       = 1;       // 会话ID
+    string account          = 2;       // 账户
+}
+
+message FutureBalance
+{
+    string              account                  = 1;  // 投资者账户
+    string              name                     = 2;  // 投资者名称
+    uint32              precision                = 3;  // 精度
+    com.smart.market.model.trade.common.CurrencyType currency                 = 4;  // 币种
+    int64              pre_balance              = 5;  // 昨结
+    int64              pre_unexp_profit         = 6;  // 上日未到期平盈
+    int64              pre_lme_position_profit  = 7;  // 上日LME持仓平盈
+    int64              pre_equity               = 8;  // 上日权益
+    int64              pre_available            = 9;  // 昨可用
+    int64              pre_maket_equity         = 10; // 上日市值权益(动态盈亏)
+
+    int64              available                = 11; // 可用
+    int64              with_draw                = 12; // 可取
+   
+    int64              adjust_value             = 13; // 资金调整
+    int64              pledged                  = 14; // 质押资金
+
+    int64              commission               = 15; // 手续费
+    int64              fee                      = 16; // 交易费
+    int64              account_fee              = 17; // 客户手续费
+    int64              buy_freeze               = 18; // 买入冻结
+    int64              buy_freeze_margin        = 19; // 冻结保证金
+    int64              freeze_fee               = 20; // 冻结费用
+    int64              sell_freeze              = 21; // 卖出冻结
+    int64              sell_freeze_margin       = 22; // 卖出冻结保证金
+    int64              close_profit             = 23; // 平仓盈亏
+    int64              unexp_profit             = 24; // 未到期平盈
+    int64              exp_profit               = 25; // 到期平仓盈亏
+    int64              position_profit          = 26; // 不含LME持仓盈亏
+    int64              lme_position_profit      = 27; // LME持仓盈亏
+    int64              initial_margin           = 28; // 初始保证金
+    int64              maintenance_margin       = 29; // 维持保证金
+    int64              upper_inital_margin      = 30; // 上手初始保证金
+    int64              upper_maintenance_margin = 31; // 上手维持保证金
+    int64              discount                 = 32; // LME贴现
+    int64              deposit                  = 33; // 入金
+    int64              drawing                  = 34; // 出金
+
+    int64              swap_in_value            = 35; // 汇入资金
+    int64              swap_out_value           = 36; // 汇出资金
+    int64              premium_income           = 37; // 权利金收取
+    int64              premium_pay              = 38; // 权利金支付
+
+    int64              balance                  = 39; // 结存
+    int64              equity                   = 40; // 当日权益
+    int64              market_equity            = 41; // 市值
+    int64              auth_value               = 42; // 授信资金
+    int64              exchange_rate            = 43; //汇率
+}
+
+message QueryFutureBalanceRsp
+{
+    TradeRetCode ret                 = 1;       // 业务处理返回信息
+    string       account             = 2;       // 账户
+    
+    FutureBalance sum_balance        = 3;       // 资金求和
+    repeated FutureBalance balances  = 4;       // 每个币种资金信息 
+}
+
+
+// 查询当日委托
+message QueryOrderReq
+{
+    uint64              session_id        = 1;       // 会话ID
+    string              account           = 2;       // 账户
+    com.smart.market.model.trade.common.ExchangeType  exchange          = 3;       // 交易所
+    string              instr_code        = 4;       // 合约代码
+    BSDirectType        direct            = 5;       // 买卖方向
+    com.smart.market.model.trade.common.CategoryType category          = 6;       // 合约大类
+    com.smart.market.model.trade.common.ProductType  product           = 7;       // 品种类型 
+    OrderTypeType       order_type        = 8;       // 委托类型
+    TimeInForceType     time_in_force     = 9;       // 委托有效类型
+    HedgeFlagType       hedge             = 10;      // 投保标志
+    string              req_id            = 11;      // 请求ID 
+    string              exchange_order_id = 12;      // 交易所委托序号
+    string              server_flag       = 13;      // 服务器标识(易盛接口使用)
+    string              expire_time       = 14;      // 委托过期时间(GTD)时需要 日期时间戳
+    bool                is_risk           = 15;      // 是否是风险单
+}
+
+// 委托信息
+message FutureOrderInfo
+{
+    string              account            = 1;     // 账户
+    com.smart.market.model.trade.common.ExchangeType exchange           = 2;     // 交易所
+    string              instr_code         = 3;     // 合约代码
+    BSDirectType        direct             = 4;     // 买卖方向
+    com.smart.market.model.trade.common.CategoryType category           = 5;     // 合约大类
+    com.smart.market.model.trade.common.ProductType  product            = 6;     // 品种类型
+    uint32              precision          = 7;     // 精度
+    
+    OrderTypeType       order_type         = 9;     // 委托类型
+    TimeInForceType     time_in_force      = 10;    // 委托有效类型
+    string              expire_time        = 11;    // 有效期日期时间
+    bool                is_risk            = 12;    // 是否是风险单
+    OffsetType          position_effect    = 13;    // 开平标志
+    HedgeFlagType       hedge              = 14;    // 投保标志
+    
+    int64              price              = 15;     // 价格
+    int64              match_price        = 16;     // 成交价格
+    int64              stop_price         = 17;     // 止损价（触发价）
+    uint32              vol                = 18;     // 报单量
+    OrderStatusType     state              = 19;     // 委托状态
+    int64              average_price      = 20;     // 成交均价
+    uint32              match_qty           = 21;     // 已成数量
+    string              order_no           = 22;     // 委托编号
+    
+    uint32              min_clip_size      = 23;     // 冰山单最小随机量
+    uint32              max_clip_size      = 24;     // 冰山单最大随机量
+    
+    uint32              calcel_qty         = 25;     // 已撤数量
+    
+    string              order_stream_id    = 26;     // 委托流水号
+    string              upper_no           = 27;     // 上手号
+    string              upper_channel_no   = 28;     // 上手通道号
+    
+    string              local_no           = 29;     // 本地流水号
+    string              upper_stream_no    = 30;     // 上手流水号
+    
+    string              is_add_one         = 31;     // 是否T+1有效，是为'Y'，否为'N'
+    uint64              usr_data           = 32;     // 用户数据
+    string              system_no          = 33;     // 系统号
+    string              exchange_system_no = 34;     // 交易所系统号
+    string              parent_system_no   = 35;     // 父单系统号
+    
+    string              insert_time         = 36;     // 本地下单时间
+    string              update_time        = 37;     // 委托更新时间
+    
+    string              server_flag         = 38;     // 服务器标识
+    uint32              error_code	    	= 39;     // 最后一次操作错误信息码
+	string              error_text			= 40;     // 错误信息
+    TradeRetCode        ret                 = 41;
+}
+
+message QueryOrderRsp
+{
+    TradeRetCode ret                 = 1;   // 业务处理返回信
+    string       account             = 2;   // 账户
+    
+    repeated FutureOrderInfo orders  = 3;
+}
+
+// 查询账户手续费计算参数
+message QueryAccountFeeRentReq
+{
+    uint64       session_id        = 1;   // 会话ID
+    string       account           = 2;   // 账户
+}
+
+message AccountFeeRent
+{
+    string              account         = 1;
+    com.smart.market.model.trade.common.ExchangeType exchange        = 2;      // 交易所代码 
+    string              product_code    = 3;      // 品种代码
+    com.smart.market.model.trade.common.CategoryType category        = 4;      // 合约大类
+    CalculateModeType   type            = 5;      // 计算方法
+    com.smart.market.model.trade.common.CurrencyType currency        = 6;      // 币种
+	com.smart.market.model.trade.common.CurrencyType currency_group_no = 7; 
+    uint64              open_close_fee  = 8;      // 开平费用
+    uint64              close_today_fee = 9;     // 平今费用
+    uint32              precision       = 10;
+}
+
+message QueryAccountFeeRentRsp
+{
+    TradeRetCode               ret                 = 1;   // 业务处理返回信息
+    string                     account             = 2;   // 账户
+    repeated AccountFeeRent    fee_info            = 3;   // 费用计算信息结构
+}
+
+// 查询账户保证金计算
+message QueryAccountMarginRentReq
+{
+    uint64              session_id        = 1;       // 会话ID
+    string              account           = 2;       // 账户
+    com.smart.market.model.trade.common.ExchangeType exchange          = 3;       // 交易所
+    string              product_code      = 4;       // 品种代码
+    com.smart.market.model.trade.common.CategoryType category          = 6;       // 合约大类
+}
+
+message AccountMarginRentInfo
+{
+	string              account            = 1;      // 账户 
+    com.smart.market.model.trade.common.ExchangeType exchange           = 2;     // 交易所
+    string              product_code       = 3;     // 品种代码
+    com.smart.market.model.trade.common.CategoryType category           = 4;     // 合约大类
+    string              instr_code         = 5;     // 合约代码 
+    com.smart.market.model.trade.common.CurrencyType currency           = 6;     // 币种
+    CalculateModeType   type               = 7;     // 计算方法
+    uint64              initial_margin     = 8;     // 初始保证金 
+    uint64              maintenance_margin = 9;     // 维持保证金
+    uint64              sell_init_margin   = 10;    // 买初始保证金
+    uint64              sell_main_margin   = 11;    // 买维持保证金
+    uint64              lock_margin        = 12;    // 锁保证金
+    uint32              precision          = 13;   
+}
+
+message QueryAccountMarginRentRsp
+{
+    TradeRetCode                   ret                 = 1;  // 业务处理返回信息
+    string                         account             = 2;  // 账户
+    repeated AccountMarginRentInfo margin_infos        = 3;
+}
+
+
+// 查询持仓汇总
+message QueryPositionSummaryReq
+{
+    uint64              session_id       = 1;    // 会话ID
+    string              account          = 2; 
+    com.smart.market.model.trade.common.ExchangeType exchange         = 3;
+    string              instr_code       = 4;
+    uint32              page_num         = 5;    // 页码
+    uint32              request_num      = 6;    // 请求行数
+}
+
+// 持仓信息
+message PositionInfo
+{
+    string                account             = 1;              // 账户ID
+    com.smart.market.model.trade.common.ExchangeType   exchange            = 2;              // 交易所ID
+    string                instr_code          = 3;              // 合约代码
+    com.smart.market.model.trade.common.CurrencyType   currency            = 4;              // 货币 
+    uint32                precision           = 5;              // 精度
+    
+    int32                 position            = 6;              // 持仓量
+    int64                 position_price      = 7;              // 持仓成本
+    int64                 average             = 8;              // 均价
+    int64                 open_cost           = 9;              // 开仓成本
+    int64                 position_profit     = 10;             // 持仓盈亏
+    int64                 lme_position_profit = 11;             // LME持仓盈亏
+    
+    int64                 calculate_price     = 12;             // 当前计算价 
+    
+    uint64                initial_margin      = 13;             // 初始保证金  
+    uint64                maintenance_margin  = 14;             // 维持保证金 
+    uint64                upper_inital_margin = 15;             // 上手初始保证金 
+    uint64                upper_maintenance_margin = 16;        // 上手维持保证金
+    PositionType          pos_type           = 17;              // 持仓类型，是否为昨仓
+    uint64                pre_margin          = 18;             // 上次占用保证金
+    uint64                used_margin         = 19;             // 占用保证金
+    BSDirectType          direct              = 20;             // 方向
+    HedgeFlagType         hedge               = 21;             // 投保标志
+    string                position_no         = 22;             // 本地持仓号
+    string                server_flag         = 23;             // 服务器标识
+    string                order_no            = 24;             // 委托编码
+    string                match_id            = 25;             // 成交号
+    string                upper_no            = 26;             // 上手号
+    string                position_stream_no  = 27;             // 持仓流水号
+    uint64                local_time          = 28;             // 本地时间
+}
+
+
+message QueryPositionSummaryRsp
+{
+    TradeRetCode ret                 = 1;       // 业务处理返回信息
+    string       account             = 2;       // 账户
+    
+    repeated     PositionInfo positions   = 3;
+}
+
+// 查询持仓信息
+message QueryPositionReq
+{
+    uint64              session_id  = 1;    // 会话ID
+    string              account     = 2; 
+    com.smart.market.model.trade.common.ExchangeType exchange    = 3;
+    string              instr_code  = 4;
+    uint32              page_num    = 5;    // 页码
+    uint32              request_num = 6;    // 请求行数
+}
+
+message QueryPositionRsp
+{
+    TradeRetCode ret                 = 1;       // 业务处理返回信
+    string       account             = 2;       // 账户
+                                         
+    repeated     PositionInfo positions   = 3;
+}
+
+// 查询成交
+message QueryMatchReq
+{
+    uint64              session_id        = 1;     // 会话ID
+    string              account           = 2;     // 账户ID
+    com.smart.market.model.trade.common.ExchangeType exchange       = 3;     // 交易所id
+    string              instr_code        = 4;     // 合约ID
+    com.smart.market.model.trade.common.CategoryType category       = 5;
+    com.smart.market.model.trade.common.ProductType  product        = 6;     // 品种类别
+    
+    BSDirectType        direct            = 7;     // 方向
+    OffsetType          position_effect   = 8;     // 开平标志
+    string              upper_no          = 9;     // 上手号
+    string              exchange_no       = 10;    // 交易所委托序号
+    string              is_add_one        = 11;    //
+    string              server_flag       = 12;    // 服务器标志
+}
+
+// 成交信息
+message MatchInfo
+{
+    string              account              = 1;   // 账户ID
+    string              instr_code           = 2;   // 合约ID
+    com.smart.market.model.trade.common.ExchangeType exchange = 3;   // 交易所id
+    com.smart.market.model.trade.common.CurrencyType currency = 4;   // 货币类型
+    com.smart.market.model.trade.common.CategoryType category = 5;   // 商品大类
+    com.smart.market.model.trade.common.ProductType  product  = 6;   // 品种类别
+    uint32              precision            = 7;   // 精度
+    BSDirectType        direct               = 8;   // 买卖方向
+    OffsetType          offset               = 9;   // 开平标志
+    string              date                 = 10;  // 成交日期
+    uint64              vol                  = 11;  // 成交数量
+    int64               price                = 12;  // 成交价格
+    string              server_flag          = 13;  // 服务器标识
+    string              order_no             = 14;  // 委托编码
+    string              order_system_no      = 15;  // 系统号
+    string              match_no             = 16;  // 本地成交序号
+    string              upper_match_no       = 17;  // 上手成交序号
+    string              exchage_match_no     = 18;  // 交易所成交序号
+    string              match_data_time      = 19;  // 成交时间
+    string              upper_match_datetime = 20;  // 上手成交时间
+    string              upper_no             = 21;  // 上手号
+    string              order_local_id       = 22;  // 本地委托序号
+    string              exchange_order_no    = 23;  // 交易所委托序号
+    string              is_add_one           = 25;  // 是否T+1有效，是为'Y'，否为'N'
+    uint64              commission           = 26;  // 手续费
+    int64               close_pos_price      = 27;  // 指定平仓价格
+}
+
+message QueryMatchRsp
+{
+    TradeRetCode ret                 = 1;    // 业务处理返回信
+    string       account             = 2;    // 账户
+                                         
+    repeated     MatchInfo matchs      = 3;    // 成交信息
+}
+
+// 查询历史委托
+message QueryHisOrderReq
+{
+    uint64    session_id       = 1;   // 会话ID
+    string    account          = 2;   // 账号
+    string    begin_date       = 3;   // 开始日期 
+    string    end_date         = 4;   // 结束日期 
+}
+
+message HisOrderInfo
+{
+	string						date				= 2;    //日期
+    string						account             = 3;    //客户资金账号
+    string						instr_code          = 4;    //合约ID
+    com.smart.market.model.trade.common.CategoryType         category            = 5;   //商品大类  
+    com.smart.market.model.trade.common.ExchangeType         exchange            = 6;   //交易所编号
+	uint32                      precision			= 7;    //精度 
+	int64                       strike_price		= 8;    // 执行价格
+	OrderTypeType				order_type			= 9;    // 委托类型
+	TimeInForceType		    	time_in_force		= 10;   // 委托有效类型
+	string                      expire_time			= 11;   // 有效日期(GTD情况下使用)
+	bool                        is_risk_order		= 12;   // 是否风险报单
+	BSDirectType				order_side			= 13;   // 买入卖出
+	OffsetType					position_effect		= 14;   // 开平标志
+	HedgeFlagType				hedge_flag			= 15;   // 投机保值
+	int64                       order_price			= 16;   // 委托价格
+	int64                       stop_price			= 17;   // 触发价格
+	uint32                      order_qty			= 18;   // 委托数量
+	uint32                      order_min_qty		= 19;   // 最小成交量
+	uint32                      order_canceled_qty   = 20;  // 撤单数量
+    string                      server_flag			= 21;   // 服务器标识 
+	string                      order_no			= 22;   // 委托编码
+    string                      order_insert_time	= 23;   // 下单时间
+	string                      order_update_time	= 24;   // 委托更新时间
+	OrderStatusType				order_status_type	= 25;   // 委托状态
+    int64                       match_price			= 26;   // 成交价
+	uint32                      match_qty			= 27;   // 成交量
+	string                      is_add_one			= 28;   // 是否T+1有效，是为'Y'，否为'N'
+	bool                        add_one_is_valid	= 29;   // 是否T+1有效
+	uint32                      error_code			= 30;   // 最后一次操作错误信息码
+	string                      error_text			= 31;   // 错误信息
+}
+
+message QueryHisOrderRsp
+{
+    TradeRetCode ret              = 1;   // 业务处理返回信
+    string       account          = 2;   // 账户
+                                      
+    repeated HisOrderInfo orders  = 3;   // 委托信息
+}
+
+// 查询历史成交
+message QueryHisMatchReq
+{
+    uint64    session_id       = 1;   // 会话ID
+    string    account          = 2;   // 账号
+    string    begin_date       = 3;   // 开始日期 
+    string    end_date         = 4;   // 结束日期 
+}
+
+message HisMatchInfo
+{
+	string						trade_date						= 1;    //交易日期
+    string						account							= 2;    //客户资金账号
+    string						instr_code						= 3;    //合约ID
+    com.smart.market.model.trade.common.CategoryType        category             = 4;    // 交易所id
+    com.smart.market.model.trade.common.ExchangeType        exchange             = 5;    // 交易所编号
+	uint32                      precision						= 6;    // 精度
+	int64                       strike_price					= 7;    // 执行价格
+	BSDirectType				match_side						= 8;    // 买入卖出
+	OffsetType					position_effect					= 9;    // 开平标志
+	HedgeFlagType				hedge_flag						= 10;   // 投机保值
+    string                      server_flag						= 11;   // 服务器标识 
+	string                      order_no						= 12;   // 委托编码
+    int64                       match_price						= 13;   // 成交价
+	uint32                      match_qty						= 14;   // 成交量
+	string                      settle_date						= 15;   // 结算日期
+	string                      match_no						= 16;   // 成交序号
+	uint64                      turnover						= 17;   // 成交金额
+	uint64                      premium_income					= 18;   // 权利金收入
+	uint64                      premium_pay						= 19;   // 权利金支出
+	uint64                      account_fee						= 20;   // 客户手续费
+	string                      match_date_time					= 21;   // 成交时间
+	string                      upper_match_date_time			= 22;   // 上手成交时间
+	int64                       close_profit					= 23;   //平仓盈亏
+	int64                       close_price						= 24;   //平仓价格
+	uint32                      close_qty						= 25;   //平仓量
+    com.smart.market.model.trade.common.CurrencyType currency					= 26;   // 货币类型
+}
+
+message QueryHisMatchRsp
+{
+    TradeRetCode ret                = 1;     // 业务处理返回信
+    string       account            = 2;     // 账户
+      
+    repeated    HisMatchInfo matchs = 3;
+}
+
+// 查询历史持仓
+message QueryHisPositionReq
+{
+    uint64     session_id       = 1;   // 会话ID
+    string     account          = 2;   // 账号
+    string     date             = 3;   // 日期 YYYY-MM-DD
+    SettleFlag flag             = 4;   // 结算标志
+    uint32     page_num         = 5;   // 页码
+    uint32     request_num      = 6;   // 请求行数    
+}
+
+message QueryHisPositionRsp
+{
+    TradeRetCode ret                = 1;        // 业务处理返回信
+    string       account            = 2;        // 账户
+                                        
+    repeated PositionInfo positions  = 3;       // 持仓信息
+}
+
+//--------------------------------------------------------------------------
+//----------------------委托------------------------------------------------
+message InsertOrderReq
+{
+    uint64                      session_id        = 1;          // 会话ID
+    string                      account           = 2;          // 账户ID
+    string                      instr_code        = 3;          // 合约ID
+    com.smart.market.model.trade.common.CategoryType         category          = 4; 
+    com.smart.market.model.trade.common.ProductType          product           = 5;          // 品种类别
+    com.smart.market.model.trade.common.ExchangeType         exchange          = 6;          // 交易所id
+    com.smart.market.model.trade.common.CurrencyType         currency          = 7;          // 货币类型
+    int64                       price             = 8;          // 价格
+    uint32                      vol               = 9;          // 报单量
+    BSDirectType                direct            = 10;         // 方向
+    OrderTypeType               order_type        = 11;         // 委托类型
+    uint32                      precision         = 12;         // 精度
+    
+    OffsetType                  offset            = 13;         // 开平标志
+    HedgeFlagType               hedge             = 14;         // 投保标志
+    TimeInForceType             time_codition     = 15;         // 委托有效类型
+    string                      expire_datetime   = 16;         // 指定有效期GTD时使用 time_t
+
+    MatchVolumeConditionType     vol_cond_type     = 17;         // 成交量类型
+    ContingentConditionType     con_cond_type     = 18;         // 触发条件
+    string                      order_local_id    = 19;         // 本地委托序号
+    int64                      stop_price        = 20;         // 触发价格
+    uint32                      min_clip_size     = 21;         // 冰山单最小随机量
+    uint32                      max_clip_size     = 22;         // 冰山单最大随机量
+
+    string                      local_time        = 23;         // 本地下单时间
+    uint64                      usr_data          = 24;         // 用户数据
+    string                      is_add_one        = 25;         // 是否T+1有效，是为'Y'，否为'N'
+}
+
+message InsertOrderRsp
+{
+    TradeRetCode              ret                 = 1;    // 业务处理返回信
+    string                    account             = 2;    // 账户ID
+    string                    instr_code          = 3;    // 合约ID
+    com.smart.market.model.trade.common.CategoryType       category            = 4;    // 品种类型
+    com.smart.market.model.trade.common.ProductType        product             = 5;    // 品种类别
+    com.smart.market.model.trade.common.ExchangeType       exchange            = 6;    // 交易所id
+    com.smart.market.model.trade.common.CurrencyType       currency            = 7;    // 货币类型
+    int64                    price               = 8;    // 价格
+    uint32                    vol                 = 9;    // 报单量
+    BSDirectType              direct              = 10;   // 方向
+    OrderTypeType             order_type          = 11;   // 委托类型
+    uint32                    precision           = 12;   // 精度
+     
+    OffsetType                offset              = 13;   // 开平标志
+    HedgeFlagType             hedge               = 14;   // 投保标志
+    TimeInForceType           time_codition       = 15;   // 委托有效类型
+    string                    expire_datetime     = 16;   // 指定有效期GTD时使用 time_t
+    
+    MatchVolumeConditionType   vol_cond_type       = 17;   // 成交量类型
+    ContingentConditionType   con_cond_type       = 18;   // 触发条件
+    string                    order_local_id      = 19;   // 本地委托序号
+    int64                    stop_price          = 20;   // 触发价格
+    uint32                    min_clip_size       = 21;   // 冰山单最小随机量
+    uint32                    max_clip_size       = 22;   // 冰山单最大随机量
+
+    string                    local_time          = 23;   // 本地下单时间
+    uint64                    usr_data            = 24;   // 用户数据
+    string                    is_add_one        = 25;     // 是否T+1有效，是为'Y'，否为'N'
+    
+	string                    server_flag         = 26;   // 服务器标识
+}
+
+// 撤单
+message CancelOrderReq
+{
+    uint64              session_id        = 1;     // 会话ID
+    string              account           = 2;     // 账户ID
+    string              order_no          = 3;     // 委托序号
+    string              server_flag       = 4;     // 服务器标识
+}
+
+// 撤单应答 
+message CancelOrderRsp
+{
+    TradeRetCode        ret                  = 1;  // 业务处理返回信息
+    string              account              = 2;  // 账户ID
+    string              instr_code           = 3;  // 合约ID
+    com.smart.market.model.trade.common.ExchangeType exchange             = 4;  // 交易所id
+    string              order_no             = 5;  // 委托序号    
+}
+
+// 改单
+message ModOrderReq
+{
+    string         account  = 1;
+    InsertOrderReq orderReq = 2;    // 原委托请求，在原委托请求上发生变更
+    string         order_no = 3;    // 委托编码
+    string         server_flag = 4;    // 服务器标识 
+}
+
+// 改单应答 
+message ModOrderRsp
+{
+    TradeRetCode        ret               = 1;     // 业务处理返回信息
+    string              account           = 2;     // 账户ID
+    string              instr_code        = 3;     // 合约ID
+    com.smart.market.model.trade.common.ExchangeType exchange  = 4; // 交易所id
+    string              order_no          = 5;     // 委托序号
+    int64               order_price       = 6;     // 委托价格
+    uint32              order_qty         = 7;     // 委托数量
+    OrderStatusType     order_state       = 8;     // 委托状态
+    uint32              precision         = 9;     // 精度
+}
+
+message PositionProfit
+{
+    string      account            = 1;   // 账户ID
+    string      instr_code         = 2;
+    uint32      precision          = 3;    // 精度
+    string      position_id        = 4;    // 本地持仓号
+    uint32      position_stream_id = 5;    // 持仓号
+    int64       profit             = 6;    // 盈亏
+    int64       price              = 7;    // 计算价格
+}
+
+message PositionProfits
+{
+    TradeRetCode        ret              = 1;    // 业务处理返回信
+    string              account          = 2;     // 账户ID
+	repeated PositionProfit  profits     = 3;
+}
+
+// 主推账断线通知
+message AccountDisConnect
+{
+    string account           = 1;  // 账户
+    bool   is_disconnect     = 2;  // 断线状态 
+    uint64 disconn_date_time = 3;  // 断线时间戳
+}
+
+// 查询费用请求
+message QueryFeeReq
+{
+    uint64 session_id             = 1;   // 会话ID
+    string account                = 3;     // 资金账号
+    com.smart.market.model.trade.common.ExchangeType exchange  = 4;     // 交易所id
+    string instr_code             = 5;     // 证券代码
+    uint32 precision              = 6;     // 精度
+    int64 price                  = 7;     // 价格
+    uint64 qty                    = 8;     // 量
+    BSDirectType   direct         = 9;     // 方向
+}
+
+message QueryFeeRsp
+{
+    string account                = 3;     // 资金账号
+    com.smart.market.model.trade.common.ExchangeType exchange  = 4;     // 交易所id
+    string instr_code             = 5;     // 证券代码
+    
+    uint64 charge                 = 6;     // 总费用
+    string name                   = 7;     // 费用名称
+    uint64 amt                    = 8;     // 费用数值
+    
+    TradeRetCode ret              = 9;
+}
+
+
+///////////////////////////////////////////////
+// 查询系统品种信息
+message QueryCommodityReq
+{
+    uint64	session_id        = 1;    // 会话ID 
+    string	account           = 2;    // 账号
+}
+
+message CommodityInfo
+{
+	string					exchange = 1;                // 交易所编码
+	com.smart.market.model.trade.common.CategoryType		category = 2;                // 品种类型
+	string					commodity = 3;               // 品种编号
+	string					commodity_name = 4;          // 品种名称
+	string					commodity_eng_name = 5;      // 品种英文名称
+	string					trade_currency = 6;          // 交易币种
+	double					contract_size = 7;           // 每手乘数
+	com.smart.market.model.trade.common.OpenCloseType	open_close_mode = 8;         // 开平方式
+	double					strike_price_times = 9;      // 执行价格倍数
+    double 					commodity_tick_size = 10;    // 最小变动价位
+	int32					commodity_denominator = 11;  // 报价分母
+	com.smart.market.model.trade.common.CmbDirectType	cmb_direct = 12;             // 组合方向
+	com.smart.market.model.trade.common.DeliverModeType	delivery_mode = 13;          // 交割行权方式
+	int32					delivery_days = 14;          // 交割日偏移
+	string					add_one_time = 15;           // T+1分割时间
+	int32					commodity_time_zone = 16;    // 品种时区
+	bool					is_add_one = 17;             // 是否处于T+1时段
+}
+
+message QueryCommodityRsps
+{
+    TradeRetCode				ret = 1;        // 业务处理返回信息 
+    string						account = 2;    // 账号
+	repeated CommodityInfo      commoditys = 3;
+}
+///////////////////////////////////////////////
+
+
+///////////////////////////////////////////////
+// 查询系统中指定品种的合约信息
+message QueryContractReq
+{
+    uint64					session_id		= 1;          // 会话ID
+    com.smart.market.model.trade.common.ExchangeType		exchange        = 2;          // 交易所编码
+    com.smart.market.model.trade.common.CategoryType		category		= 3;		  // 品种类型
+    string					commodity       = 4;          // 品种编号
+    string					account         = 5;		  // 账号
+}
+
+message ContractInfo
+{
+    string				 exchange = 1;                   // 交易所编码
+	com.smart.market.model.trade.common.CategoryType	 category = 2;                   // 品种类型
+	string				 commodity = 3;                  // 品种编号
+	string				 contract = 4;                   // 合约代码1
+	string				 strile_price = 5;               // 执行价1
+    com.smart.market.model.trade.common.CallPutType   call_put_flag1 = 6;             // 看涨看跌标示1
+	string				 contract2 = 7;                  // 合约代码2
+	string				 strile_price2 = 8;              // 执行价2
+    com.smart.market.model.trade.common.CallPutType	 call_put_flag2 = 9;             // 看涨看跌标示2
+	com.smart.market.model.trade.common.ContractType	 contract_type = 10;             // 合约类型
+	string				quote_underlying_contract = 11;  // 行情真实合约
+	string				contract_name  = 12;             // 合约名称
+	string				contract_exp_date  = 13;         // 合约到期日
+	string				last_trade_date  = 14;           // 最后交易日
+	string				firtst_notice_date = 15;         // 首次通知日
+}
+
+message QueryContractRsps
+{
+    TradeRetCode				ret = 1;              // 业务处理返回信息
+    string						account = 2;		  // 账号
+	repeated ContractInfo		contracts= 3;
+}
+///////////////////////////////////////////////
+
+///////////////////////////////////////////////
+// 查询交易币种信息
+message QueryCurrencyReq
+{
+    uint64	session_id		= 1;      // 会话ID
+    string  account         = 2;	  // 账号
+}
+
+// 查询交易币种信息应答
+message CurrencyInfo
+{
+	com.smart.market.model.trade.common.CurrencyType currency_no = 1;           // 币种编号
+	com.smart.market.model.trade.common.CurrencyType currency_group_no = 2;		// 币种组编号
+	uint64 currency_trade_rate = 3;					// 交易汇率
+	uint64 currency_trade_rate2 = 4;				// 交易汇率2
+    uint32 precision = 5;							// 精度
+}
+
+message QueryCurrencyRsps
+{
+    TradeRetCode				 ret = 1;         // 业务处理返回信息
+    string						 account = 2;	  // 账号
+	repeated CurrencyInfo    currencys = 3;
+}
+///////////////////////////////////////////////
+
+
+///////////////////////////////////////////////
+// 查询交易所信息
+message QueryExchangeReq
+{
+    uint64	session_id		= 1;      // 会话ID
+    string  account         = 2;	  // 账号
+}
+
+
+// 查询交易所信息应答
+message ExchangeInfo
+{
+	com.smart.market.model.trade.common.ExchangeType exchange_no		= 1;      // 交易所编码
+	string exchange_name    = 2;      // 交易所名称
+}
+
+message QueryExchangeRsps
+{
+    TradeRetCode				 ret = 1;         // 业务处理返回信息      
+    string						 account = 2;	  // 账号
+	repeated ExchangeInfo		 exchanges = 3;
+}
+
+message ContactInfo
+{
+    TradeRetCode				 ret = 1;         // 业务处理返回信息      
+    string						 account = 2;	  // 账号
+    repeated string              contact = 3;
+}
+
+message VertificateCodeReq
+{
+    string account           = 1;               // 账户
+    string contact           = 2;               // 
+}
+
+message VertificateCodeRsp
+{
+    TradeRetCode				 ret = 1;         // 业务处理返回信息      
+    string						 account = 2;	  // 账号
+    string                       secondSerialID = 3;
+    uint32                       effective = 4;   // valid times(minute)
+}
+
+message SetVertificateCodeReq
+{
+    string account           = 1;
+    string vertificateCode              = 2;    
+}
+///////////////////////////////////////////////

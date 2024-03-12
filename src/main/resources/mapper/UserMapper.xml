@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.demo.dao.UserRepository">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.demo.model.UserVO">
+        <id column="id" property="id" />
+        <result column="username" property="username" />
+        <result column="google" property="google" />
+        <result column="email" property="email" />
+    </resultMap>
+    <sql id="Base_Column_List">
+        id,username,google,email
+    </sql>
+
+    <select id="getAll" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from s_user;
+    </select>
+
+    <select id="getOne" parameterType="java.lang.Long" resultMap="BaseResultMap" >
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM s_user
+        WHERE id = #{id}
+    </select>
+
+    <select id="getByGoogle" parameterType="java.lang.String" resultMap="BaseResultMap" >
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM s_user
+        WHERE google = #{google}
+    </select>
+
+    <insert id="insert" parameterType="com.demo.model.UserVO">
+        insert into
+            user
+            (id,username,google,email)
+        values
+            (#{id},#{userName},#{age});
+    </insert>
+    <update id="update" parameterType="com.demo.model.UserVO">
+        update
+        user
+        set
+        <if test="userName != null">user_name=#{userName},</if>
+        <if test="age != null">age=#{age},</if>
+        where id=#{id}
+    </update>
+    <delete id="delete">
+        delete from
+            user
+        where
+            id=#{id}
+    </delete>
+</mapper>
